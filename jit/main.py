@@ -5,7 +5,6 @@ import hashlib
 import time
 import json
 import sys
-import shutil
 from colorama import init, Fore, Style
 
 init(autoreset=True)
