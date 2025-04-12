@@ -81,6 +81,12 @@ jit clean               # Show untracked files that would be removed
 jit clean -f            # Remove untracked files without prompt
 ```
 
+
+### 🔁 Rebase (✨New✨)
+```bash
+jit rebase <target-branch> # Rebase current branch onto target branch
+```
+
 ### 🚧 Future Features
 I dont think i will get to it, maybe i will, who knows (i do, and no i dont think so)
 ```bash
