@@ -11,7 +11,6 @@ setup(
         ],
     },
     author="Aryan Raskar",
-    author_email="yourname@example.com",
     description="Jit - Another version control system to ruin everyones day",
     long_description=open("README.md").read() if os.path.exists("README.md") else "",
     long_description_content_type="text/markdown",
