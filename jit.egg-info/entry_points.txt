@@ -1,0 +1,2 @@
+[console_scripts]
+jit = jit.main:main

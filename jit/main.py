@@ -714,6 +714,54 @@ def clean_untracked_files(force=False):
         except Exception as e:
             print(f"Error removing {file_path}: {e}")
 
+def rebase_branch(target_branch):
+    target_branch_path = f"{REFS_DIR}/{target_branch}"
+    if not os.path.exists(target_branch_path):
+        print(f"Error: Branch '{target_branch}' does not exist")
+        return False
+
+    current_branch, current_commit = get_current_branch_and_commit()
+    if not current_branch:
+        print("Error: Cannot rebase in detached HEAD state")
+        return False
+
+    with open(target_branch_path, 'r') as f:
+        target_commit = f.read().strip()
+
+    if current_commit == target_commit:
+        print(f"Already up to date with '{target_branch}'")
+        return True
+
+    commits_to_replay = []
+    commit_hash = current_commit
+    while commit_hash and commit_hash != target_commit:
+        commit_path = f"{OBJECTS_DIR}/{commit_hash}"
+        if not os.path.exists(commit_path):
+            print(f"Error: Commit {commit_hash} not found")
+            return False
+        with open(commit_path, 'r') as f:
+            commit_data = json.loads(f.read())
+        commits_to_replay.append((commit_hash, commit_data))
+        commit_hash = commit_data.get('parent')
+
+    if commit_hash != target_commit:
+        print(f"Error: Branches do not share a common ancestor")
+        return False
+
+    commits_to_replay.reverse()
+    new_parent = target_commit
+    for commit_hash, commit_data in commits_to_replay:
+        commit_data['parent'] = new_parent
+        commit_json = json.dumps(commit_data)
+        new_commit_hash = store_object(commit_json)
+        new_parent = new_commit_hash
+
+    with open(f"{REFS_DIR}/{current_branch}", 'w') as f:
+        f.write(new_parent)
+
+    print(f"Successfully rebased '{current_branch}' onto '{target_branch}'")
+    return True
+
 def main():
     if len(sys.argv) < 2:
         logo = f"""
@@ -743,6 +791,7 @@ def main():
             ("restore <commit>", "Restore working directory to commit"),
             ("clean [-f]", "Remove untracked files"),
             ("rm <file_path>", "Remove file and stage deletion"),
+            ("rebase <branch>", "Rebase current branch onto target branch"),
         ]
 
         max_cmd_len = max(len(cmd[0]) for cmd in commands)
@@ -837,9 +886,19 @@ def main():
         file_path = sys.argv[2]
         force = "-f" in sys.argv
         remove_file(file_path, force=force)
+
+    elif command == "rebase":
+        if len(sys.argv) < 3:
+            print("Error: Target branch name is required")
+            return
+                
+        target_branch = sys.argv[2]
+        rebase_branch(target_branch)
     
     else:
         print(f"Unknown command: {command}")
+
+
 
 if __name__ == "__main__":
     main()

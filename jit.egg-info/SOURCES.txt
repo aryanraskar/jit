@@ -1,0 +1,10 @@
+LICENSE
+README.md
+setup.py
+jit/__init__.py
+jit/main.py
+jit.egg-info/PKG-INFO
+jit.egg-info/SOURCES.txt
+jit.egg-info/dependency_links.txt
+jit.egg-info/entry_points.txt
+jit.egg-info/top_level.txt
